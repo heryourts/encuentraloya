@@ -1,69 +1,41 @@
-// ignore_for_file: use_build_context_synchronously, deprecated_member_use
+// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'verification_screen.dart';
 
-enum UserType { cliente, restaurante }
-
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+class AddDishScreen extends StatefulWidget {
+  const AddDishScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<AddDishScreen> createState() => _AddDishScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStateMixin {
-  UserType selectedType = UserType.cliente;
-  bool _obscurePassword = true;
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
+class _AddDishScreenState extends State<AddDishScreen> with TickerProviderStateMixin {
+  final nameController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final priceController = TextEditingController();
+  
+  String selectedCategory = 'Entradas';
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
-
-  // Cliente
-  final nombresController = TextEditingController();
-  final apellidosController = TextEditingController();
-  final emailController = TextEditingController();
-  final telefonoController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
-
-  // Restaurante
-  final comercialController = TextEditingController();
-  final categoriaController = TextEditingController();
-  final emailRestController = TextEditingController();
-  final telefonoRestController = TextEditingController();
-  final passwordRestController = TextEditingController();
-  final confirmPasswordRestController = TextEditingController();
-
-  String selectedCategory = 'Restaurante';
   
-  // Categorías con iconos
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
   final Map<String, IconData> categories = {
-    'Restaurante': Icons.restaurant,
-    'Cafetería': Icons.local_cafe,
-    'Pizzería': Icons.local_pizza,
-    'Pollería': Icons.set_meal,
-    'Sanguchería': Icons.lunch_dining,
-    'Heladería': Icons.icecream,
-    'Pastelería': Icons.cake,
-    'Bar': Icons.local_bar,
-    'Cervecería artesanal': Icons.sports_bar,
-    'Comida rápida': Icons.fastfood,
-    'Cevichería': Icons.set_meal,
-    'Juguería': Icons.local_drink,
-    'Chifa': Icons.ramen_dining,
-    'Parrilla': Icons.outdoor_grill,
-    'Food truck': Icons.local_shipping,
-    'Catering y eventos': Icons.celebration,
-    'Delivery exclusivo': Icons.delivery_dining,
-    'Comida regional amazónica': Icons.forest,
-    'Fuente de soda': Icons.local_dining,
-    'Sopas y caldos': Icons.soup_kitchen
+    'Entradas': Icons.restaurant,
+    'Sopas': Icons.soup_kitchen,
+    'Ensaladas': Icons.eco,
+    'Principales': Icons.dinner_dining,
+    'Postres': Icons.cake,
+    'Bebidas': Icons.local_drink,
+    'Pizzas': Icons.local_pizza,
+    'Pastas': Icons.ramen_dining,
+    'Hamburguesas': Icons.lunch_dining,
+    'Sándwiches': Icons.fastfood,
   };
 
   @override
@@ -93,18 +65,9 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
   @override
   void dispose() {
     _animationController.dispose();
-    nombresController.dispose();
-    apellidosController.dispose();
-    emailController.dispose();
-    telefonoController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    comercialController.dispose();
-    categoriaController.dispose();
-    emailRestController.dispose();
-    telefonoRestController.dispose();
-    passwordRestController.dispose();
-    confirmPasswordRestController.dispose();
+    nameController.dispose();
+    descriptionController.dispose();
+    priceController.dispose();
     super.dispose();
   }
 
@@ -138,7 +101,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        'Seleccionar foto',
+                        'Seleccionar foto del plato',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
@@ -223,22 +186,10 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
         setState(() {
           _selectedImage = File(image.path);
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Foto seleccionada correctamente'),
-            backgroundColor: Colors.green[600],
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        _showSnackBar('Foto seleccionada correctamente', isError: false);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error al seleccionar la imagen'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      _showSnackBar('Error al seleccionar la imagen', isError: true);
     }
   }
 
@@ -246,9 +197,8 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
     required TextEditingController controller,
     required String label,
     required IconData icon,
-    bool obscureText = false,
     TextInputType keyboardType = TextInputType.text,
-    bool showPasswordToggle = false,
+    int maxLines = 1,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -265,22 +215,13 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
       ),
       child: TextField(
         controller: controller,
-        obscureText: obscureText,
         keyboardType: keyboardType,
+        maxLines: maxLines,
         style: const TextStyle(fontSize: 16),
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(color: Colors.grey[600]),
           prefixIcon: Icon(icon, color: Colors.grey[600]),
-          suffixIcon: showPasswordToggle
-              ? IconButton(
-                  icon: Icon(
-                    obscureText ? Icons.visibility_off : Icons.visibility,
-                    color: Colors.grey[600],
-                  ),
-                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                )
-              : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
@@ -321,12 +262,9 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                   size: 20,
                 ),
                 const SizedBox(width: 12),
-                Flexible(
-                  child: Text(
-                    entry.key,
-                    style: const TextStyle(fontSize: 16),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                Text(
+                  entry.key,
+                  style: const TextStyle(fontSize: 16),
                 ),
               ],
             ),
@@ -335,7 +273,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
         onChanged: (value) {
           setState(() {
             selectedCategory = value!;
-            categoriaController.text = value;
           });
         },
         decoration: InputDecoration(
@@ -434,7 +371,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Seleccionar foto del restaurante',
+                            'Seleccionar foto del plato',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -459,6 +396,59 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                     ),
                   ],
                 ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _createDish() async {
+    if (nameController.text.isEmpty || 
+        descriptionController.text.isEmpty || 
+        priceController.text.isEmpty) {
+      _showSnackBar('Por favor completa todos los campos', isError: true);
+      return;
+    }
+
+    final price = double.tryParse(priceController.text);
+    if (price == null || price <= 0) {
+      _showSnackBar('Por favor ingresa un precio válido', isError: true);
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Simular creación del plato
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      final newDish = {
+        'name': nameController.text,
+        'description': descriptionController.text,
+        'price': price,
+        'category': selectedCategory,
+        'available': true,
+        'image': _selectedImage,
+      };
+
+      _showSnackBar('Plato creado correctamente', isError: false);
+      Navigator.pop(context, newDish);
+    }
+  }
+
+  void _showSnackBar(String message, {required bool isError}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red[600] : Colors.green[600],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
     );
@@ -494,7 +484,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Crear cuenta',
+          'Nuevo Plato',
           style: TextStyle(
             color: Colors.grey[800],
             fontWeight: FontWeight.w600,
@@ -515,7 +505,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                 const SizedBox(height: 20),
                 
                 Text(
-                  '¡Únete a nosotros!',
+                  'Agregar nuevo plato',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -527,7 +517,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                 const SizedBox(height: 8),
                 
                 Text(
-                  'Completa tu información para comenzar',
+                  'Completa la información de tu plato',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[600],
@@ -537,127 +527,38 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                 
                 const SizedBox(height: 32),
 
-                // Selector de tipo de usuario
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => selectedType = UserType.cliente),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              color: selectedType == UserType.cliente 
-                                  ? Colors.green[600] 
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: selectedType == UserType.cliente ? [
-                                BoxShadow(
-                                  color: Colors.green.withOpacity(0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ] : null,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.person_outline,
-                                  color: selectedType == UserType.cliente 
-                                      ? Colors.white 
-                                      : Colors.grey[600],
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Cliente',
-                                  style: TextStyle(
-                                    color: selectedType == UserType.cliente 
-                                        ? Colors.white 
-                                        : Colors.grey[600],
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => selectedType = UserType.restaurante),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              color: selectedType == UserType.restaurante 
-                                  ? Colors.green[600] 
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: selectedType == UserType.restaurante ? [
-                                BoxShadow(
-                                  color: Colors.green.withOpacity(0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ] : null,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.restaurant_outlined,
-                                  color: selectedType == UserType.restaurante 
-                                      ? Colors.white 
-                                      : Colors.grey[600],
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Restaurante',
-                                  style: TextStyle(
-                                    color: selectedType == UserType.restaurante 
-                                        ? Colors.white 
-                                        : Colors.grey[600],
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                _buildPhotoSelector(),
+                
+                _buildTextField(
+                  controller: nameController,
+                  label: 'Nombre del plato',
+                  icon: Icons.restaurant,
                 ),
+                
+                _buildTextField(
+                  controller: descriptionController,
+                  label: 'Descripción',
+                  icon: Icons.description_outlined,
+                  maxLines: 3,
+                ),
+                
+                _buildTextField(
+                  controller: priceController,
+                  label: 'Precio (S/)',
+                  icon: Icons.attach_money,
+                  keyboardType: TextInputType.number,
+                ),
+                
+                _buildDropdownField(),
 
                 const SizedBox(height: 32),
 
-                // Formulario dinámico
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: selectedType == UserType.cliente
-                      ? _buildClientForm()
-                      : _buildRestaurantForm(),
-                ),
-
-                const SizedBox(height: 32),
-
-                // Botón de crear cuenta
+                // Botón de crear plato
                 SizedBox(
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleRegister,
+                    onPressed: _isLoading ? null : _createDish,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green[600],
                       foregroundColor: Colors.white,
@@ -677,7 +578,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
                             ),
                           )
                         : const Text(
-                            'Crear cuenta',
+                            'Crear plato',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
@@ -691,171 +592,6 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildClientForm() {
-    return Column(
-      key: const ValueKey('client'),
-      children: [
-        _buildTextField(
-          controller: nombresController,
-          label: 'Nombres',
-          icon: Icons.person_outline,
-        ),
-        _buildTextField(
-          controller: apellidosController,
-          label: 'Apellidos',
-          icon: Icons.person_outline,
-        ),
-        _buildTextField(
-          controller: telefonoController,
-          label: 'Número de teléfono',
-          icon: Icons.phone_outlined,
-          keyboardType: TextInputType.phone,
-        ),
-        // Sección de credenciales agrupadas
-        Container(
-          padding: const EdgeInsets.all(20),
-          margin: const EdgeInsets.only(bottom: 20),
-          decoration: BoxDecoration(
-            color: Colors.green[50],
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.green[200]!, width: 1),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Credenciales de acceso',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.green[700],
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                controller: emailController,
-                label: 'Correo electrónico',
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              _buildTextField(
-                controller: passwordController,
-                label: 'Contraseña',
-                icon: Icons.lock_outline,
-                obscureText: _obscurePassword,
-                showPasswordToggle: true,
-              ),
-              _buildTextField(
-                controller: confirmPasswordController,
-                label: 'Confirmar contraseña',
-                icon: Icons.lock_outline,
-                obscureText: _obscurePassword,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRestaurantForm() {
-    return Column(
-      key: const ValueKey('restaurant'),
-      children: [
-        _buildTextField(
-          controller: comercialController,
-          label: 'Nombre comercial',
-          icon: Icons.storefront_outlined,
-        ),
-        _buildDropdownField(),
-        _buildPhotoSelector(),
-        _buildTextField(
-          controller: telefonoRestController,
-          label: 'Número de teléfono',
-          icon: Icons.phone_outlined,
-          keyboardType: TextInputType.phone,
-        ),
-        // Sección de credenciales agrupadas
-        Container(
-          padding: const EdgeInsets.all(20),
-          margin: const EdgeInsets.only(bottom: 20),
-          decoration: BoxDecoration(
-            color: Colors.green[50],
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.green[200]!, width: 1),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Credenciales de acceso',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.green[700],
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                controller: emailRestController,
-                label: 'Correo electrónico',
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              _buildTextField(
-                controller: passwordRestController,
-                label: 'Contraseña',
-                icon: Icons.lock_outline,
-                obscureText: _obscurePassword,
-                showPasswordToggle: true,
-              ),
-              _buildTextField(
-                controller: confirmPasswordRestController,
-                label: 'Confirmar contraseña',
-                icon: Icons.lock_outline,
-                obscureText: _obscurePassword,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _handleRegister() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Simular delay de registro
-    await Future.delayed(const Duration(milliseconds: 800));
-
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-      
-      // Ir directamente a verificación sin validaciones estrictas
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const VerificationScreen()),
-      );
-    }
-  }
-
-  void _showSnackBar(String message, {required bool isError}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red[600] : Colors.green[600],
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
         ),
       ),
     );

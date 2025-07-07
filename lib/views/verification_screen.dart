@@ -91,35 +91,38 @@ class _VerificationScreenState extends State<VerificationScreen> with TickerProv
     }
   }
 
+  void _onBackspace(int index) {
+    if (index > 0) {
+      _controllers[index - 1].clear();
+      _focusNodes[index - 1].requestFocus();
+    }
+  }
 
   String _getCode() {
     return _controllers.map((controller) => controller.text).join();
   }
 
   Future<void> _verifyCode() async {
-    final code = _getCode();
-    if (code.length != 6) {
-      _showSnackBar('Por favor ingresa el código completo', isError: true);
-      return;
-    }
-
     setState(() {
       _isLoading = true;
     });
 
     // Simular verificación
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
 
     if (mounted) {
       setState(() {
         _isLoading = false;
       });
       
-      // Simular verificación exitosa
       _showSnackBar('¡Código verificado correctamente!', isError: false);
       
-      // Aquí puedes navegar a la siguiente pantalla
-      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
+      // Regresar al login después de un momento
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      });
     }
   }
 
