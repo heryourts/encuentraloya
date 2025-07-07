@@ -1,11 +1,9 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, unused_element
 
 import 'package:encuentraloya/views/client/client_home_screen.dart';
 import 'package:encuentraloya/views/register_screen.dart';
 import 'package:encuentraloya/views/restaurant/restaurant_home_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../viewmodels/auth_viewmodel.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

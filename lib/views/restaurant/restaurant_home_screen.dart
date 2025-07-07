@@ -1,8 +1,8 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, unused_field
 
 import 'package:encuentraloya/views/restaurant/create_dish_screen.dart';
 import 'package:encuentraloya/views/restaurant/orders_screen.dart';
-import 'package:encuentraloya/views/restaurant/profile_screen.dart';
+import 'package:encuentraloya/views/restaurant/restaurant_profile_screen.dart';
 import 'package:flutter/material.dart';
 
 class RestaurantHomeScreen extends StatefulWidget {
