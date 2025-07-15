@@ -109,7 +109,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> with TickerPr
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'María González',
+                          'Usuario User',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -118,7 +118,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> with TickerPr
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'maria.gonzalez@email.com',
+                          'usuario.user@email.com',
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.grey[600],
